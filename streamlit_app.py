@@ -217,17 +217,3 @@ if st.button("Predict Loan Status"):
     else:
         st.error("❌ Loan Rejected")
 
-# -----------------------------
-# VIEW DATABASE
-# -----------------------------
-
-st.markdown("---")
-
-if st.checkbox("Show Stored Applications"):
-
-    data = pd.read_sql_query(
-        "SELECT * FROM applications",
-        conn
-    )
-
-    st.dataframe(data)
