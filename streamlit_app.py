@@ -2,20 +2,16 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-# Load Pickle Model
+# Load Model
 with open("loan_prediction_model.pkl", "rb") as f:
     model = pickle.load(f)
 
 st.set_page_config(
-    page_title="Loan Approval Predictor",
-    page_icon="🏦",
-    layout="centered"
+    page_title="Loan Approval Prediction",
+    page_icon="🏦"
 )
 
 st.title("🏦 Loan Approval Prediction System")
-st.write("Enter applicant details below")
-
-# User Inputs
 
 gender = st.selectbox(
     "Gender",
@@ -76,27 +72,54 @@ property_area = st.selectbox(
     ["Urban", "Semiurban", "Rural"]
 )
 
-# Prediction
+if st.button("Predict"):
 
-if st.button("Predict Loan Status"):
+    applicant = pd.DataFrame(
+        [[
+            gender,
+            married,
+            dependents,
+            education,
+            self_employed,
+            applicant_income,
+            coapplicant_income,
+            loan_amount,
+            loan_term,
+            credit_history,
+            property_area
+        ]],
+        columns=[
+            "Gender",
+            "Married",
+            "Dependents",
+            "Education",
+            "Self_Employed",
+            "ApplicantIncome",
+            "CoapplicantIncome",
+            "LoanAmount",
+            "Loan_Amount_Term",
+            "Credit_History",
+            "Property_Area"
+        ]
+    )
 
-    applicant = pd.DataFrame({
-        "Gender": [gender],
-        "Married": [married],
-        "Dependents": [dependents],
-        "Education": [education],
-        "Self_Employed": [self_employed],
-        "ApplicantIncome": [applicant_income],
-        "CoapplicantIncome": [coapplicant_income],
-        "LoanAmount": [loan_amount],
-        "Loan_Amount_Term": [loan_term],
-        "Credit_History": [credit_history],
-        "Property_Area": [property_area]
-    })
+    try:
+        prediction = model.predict(applicant)
 
-    prediction = model.predict(applicant)
+        if prediction[0] == "Y":
+            st.success("✅ Loan Approved")
+        else:
+            st.error("❌ Loan Rejected")
 
-    if prediction[0] == "Y":
-        st.success("✅ Loan Approved")
-    else:
-        st.error("❌ Loan Rejected")
+    except Exception as e:
+        st.error(str(e))
+
+        # Debug Info
+        st.write("Input Columns:")
+        st.write(applicant.columns.tolist())
+
+        if hasattr(model.named_steps["imputer"], "feature_names_in_"):
+            st.write("Model Expected Columns:")
+            st.write(
+                model.named_steps["imputer"].feature_names_in_.tolist()
+            )
