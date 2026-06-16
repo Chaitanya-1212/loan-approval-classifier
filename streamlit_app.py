@@ -74,52 +74,32 @@ property_area = st.selectbox(
 
 if st.button("Predict"):
 
-    applicant = pd.DataFrame(
-        [[
-            gender,
-            married,
-            dependents,
-            education,
-            self_employed,
-            applicant_income,
-            coapplicant_income,
-            loan_amount,
-            loan_term,
-            credit_history,
-            property_area
-        ]],
-        columns=[
-            "Gender",
-            "Married",
-            "Dependents",
-            "Education",
-            "Self_Employed",
-            "ApplicantIncome",
-            "CoapplicantIncome",
-            "LoanAmount",
-            "Loan_Amount_Term",
-            "Credit_History",
-            "Property_Area"
-        ]
-    )
+    applicant = pd.DataFrame({
+        "ApplicantIncome":[applicant_income],
+        "CoapplicantIncome":[coapplicant_income],
+        "LoanAmount":[loan_amount],
+        "Loan_Amount_Term":[loan_term],
+        "Credit_History":[credit_history],
 
-    try:
-        prediction = model.predict(applicant)
+        "Gender_Male":[1 if gender=="Male" else 0],
 
-        if prediction[0] == "Y":
-            st.success("✅ Loan Approved")
-        else:
-            st.error("❌ Loan Rejected")
+        "Married_Yes":[1 if married=="Yes" else 0],
 
-    except Exception as e:
-        st.error(str(e))
+        "Dependents_1":[1 if dependents=="1" else 0],
+        "Dependents_2":[1 if dependents=="2" else 0],
+        "Dependents_3+":[1 if dependents=="3+" else 0],
 
-        # Debug Info
-        st.write("Input Columns:")
-        st.write(applicant.columns.tolist())
+        "Education_Not Graduate":[1 if education=="Not Graduate" else 0],
 
-        if hasattr(model.named_steps["imputer"], "feature_names_in_"):
-            st.write("Model Expected Columns:")
-            st.write(
-                model.named_steps["imputer"].feature_names_in_.tolist()
-            )
+        "Self_Employed_Yes":[1 if self_employed=="Yes" else 0],
+
+        "Property_Area_Semiurban":[1 if property_area=="Semiurban" else 0],
+        "Property_Area_Urban":[1 if property_area=="Urban" else 0]
+    })
+
+    prediction = model.predict(applicant)
+
+    if prediction[0] == "Y":
+        st.success("✅ Loan Approved")
+    else:
+        st.error("❌ Loan Rejected")
